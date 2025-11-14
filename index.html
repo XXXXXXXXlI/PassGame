@@ -56,7 +56,6 @@
     color:#4aa3ff;text-align:center;margin-top:20px
   }
 
-  /* زر الإرسال الجديد */
   #submitBtn{
     display:none;
     width:100%;
@@ -80,9 +79,8 @@
 
   <div class="game">
 
-    <!-- يسار الصفحة -->
     <div>
-      <label>اسم اللاعب (اختياري):</label>
+      <label>اسمك:</label>
       <input id="playerName" type="text" placeholder="أدخل اسمك هنا...">
 
       <label style="margin-top:12px;">أدخل كلمة المرور:</label>
@@ -93,7 +91,6 @@
       <div class="conditions" id="conditionsContainer"></div>
     </div>
 
-    <!-- يمين الصفحة -->
     <div>
       <div class="final-message" id="successRight">
         كفو 👍🏻🎊  
@@ -102,7 +99,6 @@
         جامعة الملك خالد
       </div>
 
-      <!-- الزر أصبح هنا -->
       <button id="submitBtn" onclick="submitScore()">إرسال النتائج</button>
     </div>
 
@@ -111,9 +107,7 @@
 
 
 <script>
-// ================================
-// SEND TO SHEET (SheetDB)
-// ================================
+
 async function sendToSheet(name, password){
   const url = "https://sheetdb.io/api/v1/ne2nh5rseh84o"; 
 
@@ -136,9 +130,7 @@ async function sendToSheet(name, password){
 
 
 
-// ================================
-// GAME LOGIC
-// ================================
+
 const A={
   minLen:14,
   mitreTech:"T1047",
@@ -232,7 +224,6 @@ function validateAll(s){
 }
 
 
-// UI LOGIC
 const container=document.getElementById('conditionsContainer');
 const pwdInput=document.getElementById('pwd');
 const nameInput=document.getElementById('playerName');
