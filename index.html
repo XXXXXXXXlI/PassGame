@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cyber Password Challenge</title>
+
+<style>
+  :root{
+    --bg:#021a2e;
+    --panel:#051f33;
+    --text:#ffffff;
+    --title:#4aa3ff;
+    --muted:#7ca4d4;
+    --red:#b8324b;
+    --green:#18a36f;
+    font-family:"Segoe UI",Roboto,"Noto Naskh Arabic",system-ui
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
+
+  .wrap{
+    max-width:900px;margin:20px auto 40px;padding:22px;
+    background:var(--panel);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.3)
+  }
+
+  h1{text-align:center;font-size:22px;color:var(--title);margin-bottom:20px}
+
+  .game{display:grid;grid-template-columns:1fr 320px;gap:16px}
+  @media(max-width:880px){.game{grid-template-columns:1fr}}
+
+  label{margin-bottom:6px;color:var(--muted);display:block}
+  input[type="text"]{
+    width:100%;padding:12px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.15);
+    background:transparent;color:white;font-size:16px;
+    direction:ltr;text-align:left
+  }
+
+  .conditions{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+
+  .cond{
+    padding:12px;border-radius:8px;background:rgba(255,255,255,.03);
+    display:flex;justify-content:space-between;align-items:center;
+    border:2px solid rgba(255,255,255,.1)
+  }
+
+  .status{display:flex;gap:8px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .dot.red{background:var(--red)}
+  .dot.green{background:var(--green)}
+  .cond.red{border-color:var(--red)}
+  .cond.green{border-color:var(--green)}
+
+  .final-message{
+    display:none;font-size:20px;font-weight:bold;
+    color:#4aa3ff;text-align:center;margin-top:20px
+  }
+
+  /* زر الإرسال الجديد */
+  #submitBtn{
+    display:none;
+    width:100%;
+    padding:12px;
+    margin-top:20px;
+    background:#1e88e5;
+    color:white;
+    font-size:18px;
+    border:0;
+    border-radius:8px;
+    cursor:pointer
+  }
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <h1>Cyber Password Challenge</h1>
+
+  <div class="game">
+
+    <!-- يسار الصفحة -->
+    <div>
+      <label>اسم اللاعب (اختياري):</label>
+      <input id="playerName" type="text" placeholder="أدخل اسمك هنا...">
+
+      <label style="margin-top:12px;">أدخل كلمة المرور:</label>
+      <input id="pwd" type="text" placeholder="اكتب كلمة المرور…" autocorrect="off" autocapitalize="off">
+
+      <div class="small">مجموع الأرقام: <span id="digitSum">0</span></div>
+
+      <div class="conditions" id="conditionsContainer"></div>
+    </div>
+
+    <!-- يمين الصفحة -->
+    <div>
+      <div class="final-message" id="successRight">
+        كفو 👍🏻🎊  
+        <br><br>
+        <strong>الإدارة العامة للأمن السيبراني</strong><br>
+        جامعة الملك خالد
+      </div>
+
+      <!-- الزر أصبح هنا -->
+      <button id="submitBtn" onclick="submitScore()">إرسال النتائج</button>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+// ================================
+// SEND TO SHEET (SheetDB)
+// ================================
+async function sendToSheet(name, password){
+  const url = "https://sheetdb.io/api/v1/ne2nh5rseh84o"; 
+
+  const data = {
+    data:{
+      timestamp: new Date().toLocaleString("en-US",{ timeZone:"Asia/Riyadh" }),
+      name: name,
+      password: password
+    }
+  };
+
+  await fetch(url,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body: JSON.stringify(data)
+  });
+
+  alert("✔ تمت إضافة النتيجة بنجاح!");
+}
+
+
+
+// ================================
+// GAME LOGIC
+// ================================
+const A={
+  minLen:14,
+  mitreTech:"T1047",
+  lolbin:"rundll32.exe",
+  dfirArtifact:"prefetch",
+  blueTeamTool:"Velociraptor",
+  redTeamTool:"BloodHound",
+  hashAlgo:"bcrypt",
+  osintSite:"Virustotal",
+  grcFramework:"ISO27001",
+  vaptPort:"3389",
+  threatActor:"APT41",
+  rareExt:[".lnk",".hta",".vbs"],
+  triageArtifact:"MFT",
+  nfcrm:"NFCRM-1:2025"
+};
+
+const CONDITIONS=[
+  {key:'minLen',title:'ابدأ بقوة… كلمة مرور أقل من 14 حرف ما تعيش ثانية وحدة🛡️'},
+  {key:'hasDigit',title:'بس حروف؟ وين الأرقام؟؟؟🔢'},
+  {key:'hasUpper',title:'حروفك صغيرة ما تنشاف‫...‬ إن شاء الله تكبر.🔍'},
+  {key:'hasLower',title:'ما فيه حرف صغير منا ولا منا؟👀'},
+  {key:'hasSpecial',title:'معليش رمز خاص بالله‫...‬ سياسات السايبر الله يعين عليهم😮‍💨'},
+
+  {key:'mitreTech',title:'تقنية MITRE… لها علاقة بـ WMI'},
+  {key:'lolbin',title:'LOLBIN كلاسيكي يُستخدم في الاختراقات الصامتة…'},
+  {key:'dfirArtifact',title:'Artifact DFIR مشهور في ويندوز. أول شيء ينكب المهاجم لما يشغل برنامج'},
+  {key:'blueTeamTool',title:'أداة DFIR رهيبة بس ما انقرضت زي الديناصورات‫............‬ بس هذا هو التلميح'},
+  {key:'redTeamTool',title:' أداة هجوم تستخدم لتفكيك Active Directory… 🩸🐶اسمها دموي شوي.'},
+
+  {key:'hashAlgo',title:'خوارزمية Hash قوية… أقوى من SHA.'},
+  {key:'osintSite',title:'موقع OSINT لفحص الملفات…'},
+  {key:'grcFramework',title:'إطار GRC عالمي‫.‬'},
+  {key:'vaptPort',title:'بورت يخليك توصل لجهاز عن بعد… رقم واحد بس'},
+
+  {key:'threatActor',title:'APT هجينة… رمزهم: 🐉🐉'},
+  {key:'rareExt',title:'امتداد خطير… مو EXE'},
+  {key:'triageArtifact',title:'Artefact رئيسي في NTFS'},
+  {key:'nfcrm',title:'إطار وطني جديد لإدارة المخاطر'},
+
+  {key:'noSpaces',title:'ممنوع وجود مسافات'},
+  {key:'digitSum',title:'مجموع الأرقام يجب أن يكون أكبر من 100'}
+];
+
+function ci(s,p){return s.toLowerCase().includes(p.toLowerCase())}
+function sumDigits(s){return (s.match(/\d/g)||[]).map(Number).reduce((a,b)=>a+b,0)}
+function hasUpper(s){return /[A-Z]/.test(s)}
+function hasLower(s){return /[a-z]/.test(s)}
+function hasDigit(s){return /\d/.test(s)}
+function hasSpecial(s){return /[!@#\$%\^\&*()\-_=\+\[\]{};:'",.<>\/?\\|`~]/.test(s)}
+
+function tokenIsIsolatedAnywhere(str,token){
+  let i=0;
+  while(true){
+    const idx=str.indexOf(token,i);
+    if(idx===-1)return false;
+    const L=idx-1,R=idx+token.length;
+    const ld=L>=0&&/\d/.test(str[L]);
+    const rd=R<str.length&&/\d/.test(str[R]);
+    if(!(ld||rd))return true;
+    i=idx+1;
+  }
+}
+
+function validateAll(s){
+  const r={};
+  r.minLen=s.length>=A.minLen;
+  r.hasDigit=hasDigit(s);
+  r.hasUpper=hasUpper(s);
+  r.hasLower=hasLower(s);
+  r.hasSpecial=hasSpecial(s);
+
+  r.mitreTech=tokenIsIsolatedAnywhere(s,A.mitreTech);
+  r.lolbin=ci(s,A.lolbin);
+  r.dfirArtifact=ci(s,A.dfirArtifact);
+  r.blueTeamTool=ci(s,A.blueTeamTool);
+  r.redTeamTool=ci(s,A.redTeamTool);
+  r.hashAlgo=ci(s,A.hashAlgo);
+  r.osintSite=ci(s,A.osintSite);
+  r.grcFramework=ci(s,A.grcFramework);
+  r.vaptPort=tokenIsIsolatedAnywhere(s,A.vaptPort);
+  r.threatActor=ci(s,A.threatActor);
+  r.triageArtifact=ci(s,A.triageArtifact);
+  r.nfcrm=ci(s,A.nfcrm);
+
+  r.rareExt=A.rareExt.some(ext=>s.toLowerCase().includes(ext));
+  r.noSpaces=!(/\s/.test(s));
+  r.digitSum=sumDigits(s)>100;
+
+  return r;
+}
+
+
+// UI LOGIC
+const container=document.getElementById('conditionsContainer');
+const pwdInput=document.getElementById('pwd');
+const nameInput=document.getElementById('playerName');
+const digitSumBox=document.getElementById('digitSum');
+const successRight=document.getElementById('successRight');
+const submitBtn=document.getElementById('submitBtn');
+let elems={},revealedCount=1;
+
+function makeEl(c){
+  const el=document.createElement('div');
+  el.className='cond red';
+  el.dataset.key=c.key;
+
+  const left=document.createElement('div');
+  left.textContent=c.title;
+
+  const right=document.createElement('div');
+  right.className='status';
+
+  const dot=document.createElement('span');
+  dot.className='dot red';
+  dot.id='dot-'+c.key;
+
+  const label=document.createElement('span');
+  label.id='label-'+c.key;
+  label.textContent='غير متحقق';
+
+  right.appendChild(label);
+  right.appendChild(dot);
+  el.appendChild(left);
+  el.appendChild(right);
+  return el;
+}
+
+function init(){
+  for(const c of CONDITIONS){
+    elems[c.key+'__el']=makeEl(c);
+  }
+  render(validateAll(''));
+}
+
+function findActiveIndex(results){
+  for(let i=0;i<revealedCount;i++){
+    if(!results[CONDITIONS[i].key]) return i;
+  }
+  return -1;
+}
+
+function cascadeReveal(results){
+  while(findActiveIndex(results)===-1 && revealedCount<CONDITIONS.length){
+    revealedCount++;
+  }
+}
+
+function render(results){
+  digitSumBox.textContent=sumDigits(pwdInput.value||'');
+
+  container.innerHTML='';
+
+  const activeIdx=findActiveIndex(results);
+  if(activeIdx!==-1){
+    const k=CONDITIONS[activeIdx].key;
+    const el=elems[k+'__el'];
+
+    el.classList.add('red');
+    el.classList.remove('green');
+    el.querySelector('#dot-'+k).className='dot red';
+    el.querySelector('#label-'+k).textContent='غير متحقق';
+
+    container.appendChild(el);
+  }
+
+  const rest=[];
+  for(let i=0;i<revealedCount;i++){
+    if(i!==activeIdx) rest.push(CONDITIONS[i]);
+  }
+
+  rest.forEach(c=>{
+    const el=elems[c.key+'__el'];
+    const ok=results[c.key];
+
+    el.classList.toggle('green',ok);
+    el.classList.toggle('red',!ok);
+    el.querySelector('#dot-'+c.key).className='dot '+(ok?'green':'red');
+    el.querySelector('#label-'+c.key).textContent=ok?'متحقق':'غير متحقق';
+
+    container.appendChild(el);
+  });
+
+  const complete=CONDITIONS.every(c=>results[c.key]);
+
+  successRight.style.display = complete ? 'block' : 'none';
+  submitBtn.style.display    = complete ? 'block' : 'none';
+}
+
+function tick(){
+  const val=pwdInput.value||'';
+  const res=validateAll(val);
+  cascadeReveal(res);
+  render(res);
+}
+
+function submitScore(){
+  sendToSheet(nameInput.value||"Unknown", pwdInput.value);
+}
+
+pwdInput.addEventListener('input',tick);
+init();
+
+</script>
+</body>
+</html>
